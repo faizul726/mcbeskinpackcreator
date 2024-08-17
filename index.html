@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Skin Pack Creator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            width: 350px;
+            margin: 20px;
+        }
+        .upload-item, .name-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+        .name-item {
+            justify-content: flex-start;
+        }
+        .name-item label {
+            margin-right: 10px;
+        }
+        .toggle-container {
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .toggle-container label {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .toggle-container label span {
+            margin-left: 5px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        code {
+            display: block;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+</head>
+<body>
+    <h1>MCBE Skin Pack Creator</h1>
+    <div class="upload-container">
+        <div class="name-item">
+            <label for="packName"><b>Skin pack name:</b></label>
+            <input type="text" id="packName" placeholder="Enter skin pack name" required>
+        </div>
+
+        <div style="margin-top: 16px;" class="upload-item">
+            <input type="file" id="file1" accept=".png">
+            <div class="toggle-container">
+                <label>
+                    <input type="radio" id="wide1" name="size1" value="wide">
+                    <span>Wide</span>
+                </label>
+                <label>
+                    <input type="radio" id="slim1" name="size1" value="slim">
+                    <span>Slim</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="upload-item">
+            <input type="file" id="file2" accept=".png">
+            <div class="toggle-container">
+                <label>
+                    <input type="radio" id="wide2" name="size2" value="wide">
+                    <span>Wide</span>
+                </label>
+                <label>
+                    <input type="radio" id="slim2" name="size2" value="slim">
+                    <span>Slim</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="upload-item">
+            <input type="file" id="file3" accept=".png">
+            <div class="toggle-container">
+                <label>
+                    <input type="radio" id="wide3" name="size3" value="wide">
+                    <span>Wide</span>
+                </label>
+                <label>
+                    <input type="radio" id="slim3" name="size3" value="slim">
+                    <span>Slim</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="upload-item">
+            <input type="file" id="file4" accept=".png">
+            <div class="toggle-container">
+                <label>
+                    <input type="radio" id="wide4" name="size4" value="wide">
+                    <span>Wide</span>
+                </label>
+                <label>
+                    <input type="radio" id="slim4" name="size4" value="slim">
+                    <span>Slim</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="upload-item">
+            <input type="file" id="file5" accept=".png">
+            <div class="toggle-container">
+                <label>
+                    <input type="radio" id="wide5" name="size5" value="wide">
+                    <span>Wide</span>
+                </label>
+                <label>
+                    <input type="radio" id="slim5" name="size5" value="slim">
+                    <span>Slim</span>
+                </label>
+            </div>
+        </div>
+
+        <button style="margin-top: 16px;" id="generatePackBtn">Download skin pack</button>
+    </div>
+
+    <code>Made by ChatGPT on 20240817</code>
+
+    <script>
+        document.getElementById('generatePackBtn').addEventListener('click', function() {
+            var packName = document.getElementById('packName').value.trim();
+            if (!packName) {
+                alert("Please enter skin pack name.");
+                return;
+            }
+
+            var files = [
+                document.getElementById('file1').files[0],
+                document.getElementById('file2').files[0],
+                document.getElementById('file3').files[0],
+                document.getElementById('file4').files[0],
+                document.getElementById('file5').files[0]
+            ].filter(file => file && file.type === "image/png");
+
+            if (files.length === 0) {
+                alert("Please upload at least one PNG skin.");
+                return;
+            }
+
+            var geometries = [
+                document.querySelector('input[name="size1"]:checked').value === 'wide' ? 'geometry.humanoid.custom' : 'geometry.humanoid.customSlim',
+                document.querySelector('input[name="size2"]:checked').value === 'wide' ? 'geometry.humanoid.custom' : 'geometry.humanoid.customSlim',
+                document.querySelector('input[name="size3"]:checked').value === 'wide' ? 'geometry.humanoid.custom' : 'geometry.humanoid.customSlim',
+                document.querySelector('input[name="size4"]:checked').value === 'wide' ? 'geometry.humanoid.custom' : 'geometry.humanoid.customSlim',
+                document.querySelector('input[name="size5"]:checked').value === 'wide' ? 'geometry.humanoid.custom' : 'geometry.humanoid.customSlim'
+            ];
+
+            var zip = new JSZip();
+            
+            // Generate two UUIDs
+            var headerUUID = uuid.v4();
+            var moduleUUID = uuid.v4();
+
+            var manifest = {
+                "format_version": 2,
+                "header": {
+                    "name": "Made from faizul726.github.io",
+                    "uuid": headerUUID,
+                    "version": [1, 0, 0]
+                },
+                "modules": [
+                    {
+                        "type": "skin_pack",
+                        "uuid": moduleUUID,
+                        "version": [1, 0, 0]
+                    }
+                ]
+            };
+
+            var skins = {
+                "geometry": "geometry.json",
+                "localization_name": "faizul726",
+                "skins": []
+            };
+
+            var langFile = `skinpack.faizul726=${packName}\n`;
+
+            var filePromises = files.map((file, index) => {
+                return new Promise((resolve, reject) => {
+                    var skinName = `skin${index + 1}`;
+                    var geometry = geometries[index];
+
+                    skins.skins.push({
+                        "localization_name": skinName,
+                        "geometry": geometry,
+                        "texture": `${skinName}.png`,
+                        "type": "free"
+                    });
+
+                    langFile += `skin.faizul726.${skinName}=Skin #${index + 1}\n`;
+
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        zip.file(`${skinName}.png`, e.target.result.split(',')[1], { base64: true });
+                        resolve();
+                    };
+                    reader.onerror = function(error) {
+                        console.error("FileReader error:", error);
+                        reject(error);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            Promise.all(filePromises)
+                .then(() => {
+                    zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+                    zip.file("skins.json", JSON.stringify(skins, null, 2));
+                    zip.folder("texts").file("en_US.lang", langFile);
+
+                    var date = new Date();
+                    var formattedDate = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}`;
+                    var fileName = `skinpack_from_faizul726.zip_${formattedDate}.mpack`;
+
+                    return zip.generateAsync({ type: "blob" }).then(content => {
+                        var link = document.createElement("a");
+                        link.href = URL.createObjectURL(content);
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                })
+                .catch(error => {
+                    alert("An error occurred while generating the zip file.");
+                    console.error("Error details:", error);
+                });
+        });
+    </script>
+</body>
+</html>
